@@ -1,11 +1,12 @@
 package tgbot
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/Yuzuki999/Aws-Manger-Bot/aws"
 	log "github.com/sirupsen/logrus"
 	tb "gopkg.in/tucnak/telebot.v2"
-	"strconv"
-	"time"
 )
 
 const (
@@ -328,6 +329,14 @@ func (p *TgBot) Ec2Manger(bot *tb.Bot) {
 			log.Println("Edit message error: ", err)
 		}
 	})
+	c4 := typeKey.Data("c4.xlarge", "c4xlarge")
+	bot.Handle(&c4, func(c *tb.Callback) {
+		p.Data[c.Sender.ID].Data["type"] = "c4.xlarge"
+		_, err := bot.Edit(c.Message, "请选择操作系统", amiKey)
+		if err != nil {
+			log.Println("Edit message error: ", err)
+		}
+	})
 	otherType := typeKey.Data("其他类型", "otherType")
 	bot.Handle(&otherType, func(c *tb.Callback) {
 		_, editErr := bot.Edit(c.Message, "请输入ec2类型: ")
@@ -358,7 +367,7 @@ func (p *TgBot) Ec2Manger(bot *tb.Bot) {
 			p.Session.SessionDel(c.Sender.ID)
 		}
 	})
-	typeKey.Inline(typeKey.Row(t2, t3), typeKey.Row(otherType))
+	typeKey.Inline(typeKey.Row(t2, t3, c4), typeKey.Row(otherType))
 	regionWl := &tb.ReplyMarkup{}
 	tokyo := regionWl.Data("东京", "tokyo_wl")
 	bot.Handle(&tokyo, func(c *tb.Callback) {
